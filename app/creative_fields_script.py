@@ -14,7 +14,7 @@ from googleapiclient.discovery import build
 # =========================
 # CONFIG
 # =========================
-SERVICE_ACCOUNT_FILE = r'C:\Users\LilyDurbin\Documents\DataStudioReport\service_account.json'
+SERVICE_ACCOUNT_FILE = os.getenv("SERVICE_KEY")
 DELEGATED_USER = os.getenv("DELEGATED_USER", "lily.johnson@mediatwo.net")
 CM360_PROFILE_ID = os.getenv("CM360_PROFILE_ID", "")
 ADVERTISER_ID = os.getenv("CM360_ADVERTISER_ID", "")
@@ -36,7 +36,7 @@ DISCOVERY_URL = "https://dfareporting.googleapis.com/$discovery/rest?version=v5"
 # AUTH
 # =========================
 def get_credentials() -> Credentials:
-    creds = Credentials.from_service_account_file(
+    creds = Credentials.from_service_account_info(
         SERVICE_ACCOUNT_FILE,
         scopes=SCOPES,
     )
