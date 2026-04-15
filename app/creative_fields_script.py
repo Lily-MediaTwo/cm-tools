@@ -1,6 +1,7 @@
 import os
 import time
 from typing import Dict, List, Tuple, Any
+import logging
 
 import pandas as pd
 from datetime import timezone
@@ -586,9 +587,11 @@ def main():
     if not SPREADSHEET_ID:
         raise ValueError("Missing GOOGLE_SHEETS_ID")
 
+    print("starting credentials")
     creds = get_credentials()
     cm_service = get_cm360_service(creds)
     gs_client = get_gspread_client(creds)
+    print("getting spreadsheet")
     spreadsheet = gs_client.open_by_key(SPREADSHEET_ID)
     control_ws = ensure_control_tab(spreadsheet)
     ensure_changelog_tab(spreadsheet)
