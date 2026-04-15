@@ -15,7 +15,7 @@ from googleapiclient.discovery import build
 # =========================
 # CONFIG
 # =========================
-SERVICE_ACCOUNT_FILE = os.getenv("SERVICE_KEY")
+SERVICE_ACCOUNT_FILE = os.environ.get("SERVICE_KEY")
 DELEGATED_USER = os.getenv("DELEGATED_USER", "lily.johnson@mediatwo.net")
 CM360_PROFILE_ID = os.getenv("CM360_PROFILE_ID", "")
 ADVERTISER_ID = os.getenv("CM360_ADVERTISER_ID", "")
