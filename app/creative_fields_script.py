@@ -37,13 +37,24 @@ DISCOVERY_URL = "https://dfareporting.googleapis.com/$discovery/rest?version=v5"
 # AUTH
 # =========================
 def get_credentials() -> Credentials:
+    raw_json = os.getenv("SERVICE_KEY")
+
+    if not raw_json:
+        raise ValueError("SERVICE_KEY environment variable is missing")
+
+    try:
+        service_account_info = json.loads(raw_json)
+    except Exception as e:
+        raise ValueError(f"SERVICE_KEY is not valid JSON: {str(e)}")
+
     creds = Credentials.from_service_account_info(
-        SERVICE_ACCOUNT_FILE,
+        service_account_info,
         scopes=SCOPES,
     )
 
     delegated_creds = creds.with_subject(DELEGATED_USER)
     delegated_creds.refresh(Request())
+
     return delegated_creds
 
 
