@@ -9,6 +9,8 @@ from google.oauth2.service_account import Credentials
 from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
 
+from flask import Flask, request, jsonify
+
 
 # =========================
 # CONFIG
@@ -658,6 +660,12 @@ def main():
 
     print(f"Done. Wrote {len(master_df):,} creatives and {len(options_df.columns):,} creative fields.")
 
+app = Flask(__name__)
 
-if __name__ == "__main__":
-    main()
+@app.route("/run", methods=["POST"])
+def run_job():
+    try:
+        main()  # your existing function
+        return jsonify({"status": "success"})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
