@@ -9,9 +9,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY app/ ./app/
 
-# Copy service account
-COPY service_account.json ./service_account.json
-
 # Environment variables
 ENV PORT=8080
 
