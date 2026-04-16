@@ -16,7 +16,6 @@ from googleapiclient.discovery import build
 # =========================
 # CONFIG
 # =========================
-SERVICE_ACCOUNT_FILE = os.environ.get("SERVICE_KEY")
 DELEGATED_USER = os.getenv("DELEGATED_USER", "lily.johnson@mediatwo.net")
 CM360_PROFILE_ID = os.getenv("CM360_PROFILE_ID", "")
 ADVERTISER_ID = os.getenv("CM360_ADVERTISER_ID", "")
@@ -306,8 +305,9 @@ def ensure_control_tab(spreadsheet):
     if not existing:
         values = [
             ["Setting", "Value"],
+            ["Advertiser ID", ""],
             ["Run Mode", "SYNC"],
-            ["Push Scope", "FLAGGED_ONLY"],
+            ["Push Scope", "YES"],
             ["Ready To Push", "NO"],
             ["Last Run Type", ""],
             ["Last Run Timestamp", ""],
@@ -329,15 +329,24 @@ def read_control_settings(control_ws) -> Dict[str, str]:
 
 
 def write_control_status(control_ws, run_type: str, result: str, message: str):
+    values = control_ws.get("A2:B20")
+
+    row_map = {}
+    for i, row in enumerate(values, start=2):
+        if len(row) >= 1 and row[0]:
+            row_map[row[0].strip()] = i
+
+    def update(setting_name, value):
+        row = row_map.get(setting_name)
+        if row:
+            control_ws.update(f"B{row}", [[value]])
+
     ts = pd.Timestamp.now(tz="America/New_York").strftime("%Y-%m-%d %H:%M:%S")
-    updates = {
-        "B5": run_type,
-        "B6": ts,
-        "B7": result,
-        "B8": message,
-    }
-    for cell, value in updates.items():
-        control_ws.update(cell, [[value]])
+
+    update("Last Run Type", run_type)
+    update("Last Run Timestamp", ts)
+    update("Last Run Result", result)
+    update("Last Run Message", message)
 
 
 def ensure_changelog_tab(spreadsheet):
@@ -473,6 +482,13 @@ def patch_creative_assignments(service, profile_id: str, creative_id: str, assig
         body=body,
     ).execute()
 
+def update_control_value(control_ws, setting_name, value):
+    values = control_ws.get("A2:B20")
+
+    for i, row in enumerate(values, start=2):
+        if len(row) >= 1 and row[0].strip() == setting_name:
+            control_ws.update(f"B{i}", [[value]])
+            return
 
 def run_push_mode(
     service,
@@ -581,8 +597,8 @@ def run_push_mode(
 
     clear_and_write_df(master_ws, master_df)
     append_changelog_rows(changelog_ws, changelog_rows)
-    control_ws.update("B3", [["FLAGGED_ONLY"]])
-    control_ws.update("B4", [["NO"]])
+    update_control_value(control_ws, "Push Scope", "FLAGGED_ONLY")
+    update_control_value(control_ws, "Ready To Push", "NO")
     write_control_status(control_ws, "PUSH", "SUCCESS", f"Processed {len(flagged)} flagged row(s).")
 
 
