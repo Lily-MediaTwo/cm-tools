@@ -369,8 +369,17 @@ def ensure_changelog_tab(spreadsheet):
 
 
 def append_changelog_rows(changelog_ws, rows: List[List[str]]):
-    if rows:
-        changelog_ws.append_rows(rows, value_input_option="USER_ENTERED")
+    if not rows:
+        return
+
+    existing = changelog_ws.get_all_values()
+    next_row = len(existing) + 1
+
+    changelog_ws.update(
+        f"A{next_row}",
+        rows,
+        value_input_option="USER_ENTERED"
+    )
 
 
 def read_sheet_as_df(worksheet) -> pd.DataFrame:
